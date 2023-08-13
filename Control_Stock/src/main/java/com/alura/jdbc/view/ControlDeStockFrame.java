@@ -55,6 +55,7 @@ public class ControlDeStockFrame extends JFrame {
         modelo.addColumn("Identificador del Producto");
         modelo.addColumn("Nombre del Producto");
         modelo.addColumn("Descripción del Producto");
+        modelo.addColumn("Cantidad");
 
         cargarTabla();
 
@@ -208,20 +209,25 @@ public class ControlDeStockFrame extends JFrame {
                 }, () -> JOptionPane.showMessageDialog(this, "Por favor, elije un item"));
     }
 
+    
+    /*Este metodo se encarga de colocar el resultado de la consulta a la base de datos en la ventana*/
     private void cargarTabla() {
     	try {
+    		/*Vemos que productos es un Map<String,String> como lo declaramos 
+    		 * en el metodo listar, así que tiene el método forEach*/
         var productos = this.productoController.listar();
+        
+        try {
+            productos.forEach(producto -> modelo.addRow(new Object[] { producto.get("ID"), producto.get("NOMBRE"),producto.get("DESCRIPCION"),producto.get("CANTIDAD") }));
+        } catch (Exception e) {
+            throw e;
+        }
+        
     	} catch(SQLException  e) {
     		throw new RuntimeException(e);
     	}
 
-        try {
-            // TODO
-            // productos.forEach(producto -> modelo.addRow(new Object[] { "id", "nombre",
-            // "descripcion" }));
-        } catch (Exception e) {
-            throw e;
-        }
+        
     }
 
     private void guardar() {
