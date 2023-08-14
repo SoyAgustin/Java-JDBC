@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.alura.jdbc.factory.ConnectionFactory;
+
 public class ProductoController {
 
 	public void modificar(String nombre, String descripcion, Integer id) {
@@ -24,10 +26,7 @@ public class ProductoController {
 	//Declaeamos que el metodo devuelve un listado de tipo Map<String,String>
 	public List<Map<String,String>> listar() throws SQLException{
 		//EStablecemos una conexion con la base de datos mysql
-		Connection con = DriverManager.getConnection(
-				"jdbc:mysql://localhost/control_de_stock?useTImeZone=true&serverTimeZone=UTC",
-				"root",
-				"Be594622d2");
+		Connection con  = new ConnectionFactory().recuperaConexion();
 		
 		//En java las querys de sql son del tipo Statement del paquete sql
 		Statement statement = con.createStatement();
