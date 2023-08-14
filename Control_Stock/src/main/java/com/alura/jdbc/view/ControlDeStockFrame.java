@@ -5,6 +5,7 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Optional;
 
 import javax.swing.JButton;
@@ -246,11 +247,23 @@ public class ControlDeStockFrame extends JFrame {
             return;
         }
 
-        // TODO
-        var producto = new Object[] { textoNombre.getText(), textoDescripcion.getText(), cantidadInt };
+        /*Se debe cambiar el tipo de la variable producto, como ya se declaro 
+         * en ProductoControl, al hacer la consulta a la base de datos, producto 
+         * debe ser del tipo HashMap<String,String>*/
+        var producto = new HashMap<String,String> ();
+        producto.put("NOMBRE",textoNombre.getText());
+         producto.put("DESCRIPCION",textoDescripcion.getText());
+         producto.put("CANTIDAD",String.valueOf(cantidadInt)) ;
         var categoria = comboCategoria.getSelectedItem();
-
-        this.productoController.guardar(producto);
+        
+        /*Encapsulamos la excepcion que puede lanzar la consulta INSERT INTO del
+         * método guardar, igual que en otros casos, en caso de error se lanza la
+         * excepción RuntimeException*/
+        try {
+			this.productoController.guardar(producto);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 
         JOptionPane.showMessageDialog(this, "Registrado con éxito!");
 

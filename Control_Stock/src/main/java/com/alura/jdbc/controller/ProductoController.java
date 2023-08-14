@@ -1,7 +1,6 @@
 package com.alura.jdbc.controller;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -25,7 +24,7 @@ public class ProductoController {
 	//La SQLExcepcion la trata en ControDeStockFrame  en el método cargar tabla con un try catch.
 	//Declaeamos que el metodo devuelve un listado de tipo Map<String,String>
 	public List<Map<String,String>> listar() throws SQLException{
-		//EStablecemos una conexion con la base de datos mysql
+		//Establecemos una conexion con la base de datos mysql
 		Connection con  = new ConnectionFactory().recuperaConexion();
 		
 		//En java las querys de sql son del tipo Statement del paquete sql
@@ -64,8 +63,42 @@ public class ProductoController {
 		return resultado;
 	}
 
-    public void guardar(Object producto) {
-		// TODO
+	
+	/*Para guardar primero realizamos una conexion con la base de datos
+	 * posteriormente creamos un statement (consulta)*/
+    public void guardar(Map<String,String> producto) throws SQLException {
+		Connection con = new ConnectionFactory().recuperaConexion();
+		
+		Statement statement= con.createStatement();
+		
+		/*En este caso necesitamos agregar comillas simples ( ' ) para la consulta
+		 * y es por eso que se concatena y combina entre las comillas dobles ( " ).
+		 * Para confurdirnos lo menos posible, entendemos que las comillas dobles son para 
+		 * Java y las comillas simples para SQL. */
+		
+		/*Como el parámetro de este método es un Map llamado producto, la consulta 
+		 * va a tomar el valor de la clave que se le pida con el método .get, así que 
+		 * producto.get("clave") devuelve el valor correspondiente.*/
+		statement.execute("INSERT INTO producto (nombre, descripcion, cantidad)"
+				+"VALUES"+"("
+				+"'"+producto.get("NOMBRE")+"'"+"," //explicitamente coloco las comillas simples en una cadena aparte
+				+"'"+producto.get("DESCRIPCION")+"'"+","//El motivo es que se regresan Strings y eso cerraría las comillas dobles usuales
+				+"'"+producto.get("CANTIDAD")+"'"
+				+")"
+				,Statement.RETURN_GENERATED_KEYS);
+		/*Usamos el método sobrecargado que devuelve las keys generadas automaticamente
+		 * en este caso son las ID*/
+		
+		ResultSet resultSet = statement.getGeneratedKeys();
+		
+		while(resultSet.next()) {
+			/*Como solo se retorna el id, el metodo getInt busca en la unica 'columna' devuelta*/
+			System.out.println(String.format(
+					"Se guardó el objeto con ID: %d",
+					resultSet.getInt(1) )
+					);
+		}
+		
 	}
 
 }
