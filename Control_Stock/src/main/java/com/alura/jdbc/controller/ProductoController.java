@@ -17,8 +17,18 @@ public class ProductoController {
 		// TODO
 	}
 
-	public void eliminar(Integer id) {
-		// TODO
+	public int eliminar(Integer id) throws SQLException {
+		Connection con  = new ConnectionFactory().recuperaConexion();
+		
+		Statement statement = con.createStatement();		
+		statement.execute("DELETE FROM producto WHERE ID ="+id);
+		
+		//Para saber si se realizo bien la eliminación usamos el método getUpdateCount()
+		//Este numero entero dice cuántas líneas fueron modificadas.
+		int updateCount = statement.getUpdateCount();
+		
+		con.close();
+		return  updateCount;
 	}
 
 	//La SQLExcepcion la trata en ControDeStockFrame  en el método cargar tabla con un try catch.
