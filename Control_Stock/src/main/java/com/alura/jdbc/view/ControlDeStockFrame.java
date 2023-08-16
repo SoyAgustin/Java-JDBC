@@ -185,12 +185,16 @@ public class ControlDeStockFrame extends JFrame {
         Optional.ofNullable(modelo.getValueAt(tabla.getSelectedRow(), tabla.getSelectedColumn()))
                 .ifPresentOrElse(fila -> {
                 	/*Originalmente se tienen cast explícitos de Object a integet, pero esto vimos que no era posible. 
-                	 * solucion con el metodo Integer.ValueOf() y para object el metodo toString()*/
+                	 * solucion con el metodo Integer.ValueOf(Object) y para Object el metodo toString()*/
                     Integer id = Integer.valueOf( modelo.getValueAt(tabla.getSelectedRow(), 0).toString());
                     String nombre = (String) modelo.getValueAt(tabla.getSelectedRow(), 1);
                     String descripcion = (String) modelo.getValueAt(tabla.getSelectedRow(), 2);
-
-                    this.productoController.modificar(nombre, descripcion, id);
+                    Integer cantidad = Integer.valueOf( modelo.getValueAt(tabla.getSelectedRow(), 3).toString());
+                    try {
+						this.productoController.modificar(nombre, descripcion, cantidad,id);
+					} catch (SQLException e) {
+						throw new RuntimeException(e);
+					}
                 }, () -> JOptionPane.showMessageDialog(this, "Por favor, elije un item"));
     }
 

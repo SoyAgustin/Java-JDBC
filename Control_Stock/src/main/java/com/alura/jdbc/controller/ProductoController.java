@@ -13,8 +13,25 @@ import com.alura.jdbc.factory.ConnectionFactory;
 
 public class ProductoController {
 
-	public void modificar(String nombre, String descripcion, Integer id) {
-		// TODO
+	public void modificar(String nombre, String descripcion, Integer cantidad,Integer id) throws SQLException {
+		Connection con = new ConnectionFactory().recuperaConexion();
+		Statement statement = con.createStatement();
+		/*
+		statement.execute("UPDATE producto" + 
+		"SET nombre = "+"'"+nombre+"' "+
+		"SET descripcion= "+"'"+descripcion+"' "+
+		"SET cantidad= "+cantidad+
+		" WHERE id = "+id);*/
+		
+		statement.execute(String.format("UPDATE producto SET "
+				+ " nombre ='%s',"
+				+ " descripcion='%s',"
+				+ " cantidad=%d"
+				+ " WHERE id=%d",
+				nombre,descripcion,cantidad,id));
+		
+		
+		con.close();
 	}
 
 	public int eliminar(Integer id) throws SQLException {
