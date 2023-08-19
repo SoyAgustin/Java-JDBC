@@ -1,6 +1,7 @@
 package com.alura.jdbc.controller;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -15,20 +16,19 @@ public class ProductoController {
 
 	public void modificar(String nombre, String descripcion, Integer cantidad,Integer id) throws SQLException {
 		Connection con = new ConnectionFactory().recuperaConexion();
-		Statement statement = con.createStatement();
-		/*
-		statement.execute("UPDATE producto" + 
-		"SET nombre = "+"'"+nombre+"' "+
-		"SET descripcion= "+"'"+descripcion+"' "+
-		"SET cantidad= "+cantidad+
-		" WHERE id = "+id);*/
 		
-		statement.execute(String.format("UPDATE producto SET "
-				+ " nombre ='%s',"
-				+ " descripcion='%s',"
-				+ " cantidad=%d"
-				+ " WHERE id=%d",
-				nombre,descripcion,cantidad,id));
+		//Haciendo uso de prepared statement para evitar sql inyection
+		PreparedStatement statement = con.prepareStatement("UPDATE producto SET "
+				+ " nombre =?,"
+				+ " descripcion=?,"
+				+ " cantidad=?"
+				+ " WHERE id=?");
+		statement.setString(1,nombre);
+		statement.setString(2,descripcion);
+		statement.setInt(3, cantidad);
+		statement.setInt(4, id);
+		
+		statement.execute();
 		
 		
 		con.close();
@@ -37,8 +37,10 @@ public class ProductoController {
 	public int eliminar(Integer id) throws SQLException {
 		Connection con  = new ConnectionFactory().recuperaConexion();
 		
-		Statement statement = con.createStatement();		
-		statement.execute("DELETE FROM producto WHERE ID ="+id);
+		//Haciendo uso de prepared statement para evitar sql inyection
+		PreparedStatement statement = con.prepareStatement("DELETE FROM producto WHERE ID =?");
+		statement.setInt(1, id);
+		statement.execute();
 		
 		//Para saber si se realizo bien la eliminación usamos el método getUpdateCount()
 		//Este numero entero dice cuántas líneas fueron modificadas.
@@ -54,12 +56,9 @@ public class ProductoController {
 		//Establecemos una conexion con la base de datos mysql
 		Connection con  = new ConnectionFactory().recuperaConexion();
 		
-		//En java las querys de sql son del tipo Statement del paquete sql
-		Statement statement = con.createStatement();
-		
-		//Se ejecuta la consulta a la base de datos y se almacena internamente 
-		//en el statement para despues consultar el resultado en resultSet
-		statement.execute("SELECT ID, NOMBRE, DESCRIPCION, CANTIDAD FROM producto");
+		//Hacemos uso del prepared statement para evitar sql inyection
+		PreparedStatement statement = con.prepareStatement("SELECT ID, NOMBRE, DESCRIPCION, CANTIDAD FROM producto");
+		statement.execute();
 		
 		//resultSet es de un tipo iterador, tiene el metodo next
 		ResultSet resultSet = statement.getResultSet();
@@ -96,25 +95,18 @@ public class ProductoController {
     public void guardar(Map<String,String> producto) throws SQLException {
 		Connection con = new ConnectionFactory().recuperaConexion();
 		
-		Statement statement= con.createStatement();
+		/*Para evitar una sql inyection se debe usar un prepared statement en lugar de
+		 * un create statement.
+		 * La sintaxis ahora es colocando signos de interrogación*/
+		PreparedStatement statement = con.prepareStatement("INSERT INTO producto (nombre, descripcion, cantidad)"+
+		 "VALUES(?,?,?)",Statement.RETURN_GENERATED_KEYS);
 		
-		/*En este caso necesitamos agregar comillas simples ( ' ) para la consulta
-		 * y es por eso que se concatena y combina entre las comillas dobles ( " ).
-		 * Para confurdirnos lo menos posible, entendemos que las comillas dobles son para 
-		 * Java y las comillas simples para SQL. */
+		statement.setString(1, producto.get("NOMBRE"));
+		statement.setString(2, producto.get("DESCRIPCION"));
+		statement.setInt(3,Integer.valueOf(producto.get( "CANTIDAD")));
 		
-		/*Como el parámetro de este método es un Map llamado producto, la consulta 
-		 * va a tomar el valor de la clave que se le pida con el método .get, así que 
-		 * producto.get("clave") devuelve el valor correspondiente.*/
-		statement.execute("INSERT INTO producto (nombre, descripcion, cantidad)"
-				+"VALUES"+"("
-				+"'"+producto.get("NOMBRE")+"'"+"," //explicitamente coloco las comillas simples en una cadena aparte
-				+"'"+producto.get("DESCRIPCION")+"'"+","//El motivo es que se regresan Strings y eso cerraría las comillas dobles usuales
-				+"'"+producto.get("CANTIDAD")+"'"
-				+")"
-				,Statement.RETURN_GENERATED_KEYS);
-		/*Usamos el método sobrecargado que devuelve las keys generadas automaticamente
-		 * en este caso son las ID*/
+		/*usando las prepared statement el metodo execute queda vacio*/
+		statement.execute();
 		
 		ResultSet resultSet = statement.getGeneratedKeys();
 		
