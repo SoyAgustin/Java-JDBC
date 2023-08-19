@@ -101,9 +101,31 @@ public class ProductoController {
 		PreparedStatement statement = con.prepareStatement("INSERT INTO producto (nombre, descripcion, cantidad)"+
 		 "VALUES(?,?,?)",Statement.RETURN_GENERATED_KEYS);
 		
-		statement.setString(1, producto.get("NOMBRE"));
-		statement.setString(2, producto.get("DESCRIPCION"));
-		statement.setInt(3,Integer.valueOf(producto.get( "CANTIDAD")));
+		/*Ahora vamos a agregar una nueva regla de negocio
+		 * solo se admiten en una peticion hasta 50 productos
+		 * si son más la query se dividira en dos*/
+		
+		String nombre = producto.get("NOMBRE");
+		String descripcion = producto.get("DESCRIPCION");
+		Integer cantidad = Integer.valueOf(producto.get( "CANTIDAD"));
+		Integer maximaCantidad = 50;
+		/*La logica va a ser restar la maxima cantidad hasta que la cantidad sea
+		 * cero, de esta forma se dividiran los registros en bloques de la maxima cantidad*/
+		do {
+			int cantidadParaGuardar = Math.min(cantidad, maximaCantidad);
+			ejecutaRegistro(statement, nombre, descripcion, cantidadParaGuardar);
+			cantidad -= maximaCantidad;
+		}while(cantidad>0) ;
+		
+		
+		con.close();
+	}
+
+	private void ejecutaRegistro(PreparedStatement statement, String nombre, String descripcion, Integer cantidad)
+			throws SQLException {
+		statement.setString(1, nombre);
+		statement.setString(2, descripcion);
+		statement.setInt(3,cantidad);
 		
 		/*usando las prepared statement el metodo execute queda vacio*/
 		statement.execute();
@@ -117,7 +139,6 @@ public class ProductoController {
 					resultSet.getInt(1) )
 					);
 		}
-		
 	}
 
 }
