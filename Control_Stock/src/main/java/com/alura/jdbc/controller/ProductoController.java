@@ -90,14 +90,14 @@ public class ProductoController {
 	}
 
 	
-	/*Para guardar primero realizamos una conexion con la base de datos
-	 * posteriormente creamos un statement (consulta)*/
+	
     public void guardar(Map<String,String> producto) throws SQLException {
 		Connection con = new ConnectionFactory().recuperaConexion();
 		
-		/*Para evitar una sql inyection se debe usar un prepared statement en lugar de
-		 * un create statement.
-		 * La sintaxis ahora es colocando signos de interrogación*/
+		/*Manejo de las transacciones de la base de datos se hacen automaticamente
+		 * */
+		con.setAutoCommit(false);
+		
 		PreparedStatement statement = con.prepareStatement("INSERT INTO producto (nombre, descripcion, cantidad)"+
 		 "VALUES(?,?,?)",Statement.RETURN_GENERATED_KEYS);
 		
@@ -111,18 +111,30 @@ public class ProductoController {
 		Integer maximaCantidad = 50;
 		/*La logica va a ser restar la maxima cantidad hasta que la cantidad sea
 		 * cero, de esta forma se dividiran los registros en bloques de la maxima cantidad*/
-		do {
-			int cantidadParaGuardar = Math.min(cantidad, maximaCantidad);
-			ejecutaRegistro(statement, nombre, descripcion, cantidadParaGuardar);
-			cantidad -= maximaCantidad;
-		}while(cantidad>0) ;
-		
-		
+		try {	
+			do {
+				int cantidadParaGuardar = Math.min(cantidad, maximaCantidad);
+				ejecutaRegistro(statement, nombre, descripcion, cantidadParaGuardar);
+				cantidad -= maximaCantidad;
+			}while(cantidad>0) ;
+			
+			//Hasta el momento en el que se cumple todo el ciclo (sin errores) se usa el commit
+			con.commit();
+			System.out.println("COMMIT");
+		}catch(Exception e){
+			/*En caso de que haya un error, se cancela la transaccion*/
+			con.rollback();
+			System.out.println("ROLLBACK");
+		}
+		statement.close();
 		con.close();
 	}
 
 	private void ejecutaRegistro(PreparedStatement statement, String nombre, String descripcion, Integer cantidad)
 			throws SQLException {
+	if(cantidad <50) {
+		throw new RuntimeException("Ocurrio un error");
+	}
 		statement.setString(1, nombre);
 		statement.setString(2, descripcion);
 		statement.setInt(3,cantidad);
