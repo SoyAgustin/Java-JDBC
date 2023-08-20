@@ -14,9 +14,19 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>mysql</groupId>
+			<groupId>mysql</groupId><!-- Dependencia de mysql-->
 			<artifactId>mysql-connector-java</artifactId>
 			<version>8.0.26</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mchange</groupId>
+			<artifactId>c3p0</artifactId><!-- pool de conexiones-->
+			<version>0.9.5.5</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mchange</groupId>
+			<artifactId>mchange-commons-java</artifactId> <!-- agregar mas detalles del datasource via el log en la consola-->
+			<version>0.2.20</version>
 		</dependency>
 	</dependencies>
 
