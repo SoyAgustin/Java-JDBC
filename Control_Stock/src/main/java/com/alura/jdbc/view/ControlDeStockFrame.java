@@ -5,7 +5,6 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Optional;
 
 import javax.swing.JButton;
@@ -19,6 +18,7 @@ import javax.swing.table.DefaultTableModel;
 
 import com.alura.jdbc.controller.CategoriaController;
 import com.alura.jdbc.controller.ProductoController;
+import com.alura.jdbc.modelo.Producto;
 
 public class ControlDeStockFrame extends JFrame {
 
@@ -263,10 +263,8 @@ public class ControlDeStockFrame extends JFrame {
         /*Se debe cambiar el tipo de la variable producto, como ya se declaro 
          * en ProductoControl, al hacer la consulta a la base de datos, producto 
          * debe ser del tipo HashMap<String,String>*/
-        var producto = new HashMap<String,String> ();
-        producto.put("NOMBRE",textoNombre.getText());
-         producto.put("DESCRIPCION",textoDescripcion.getText());
-         producto.put("CANTIDAD",String.valueOf(cantidadInt)) ;
+        var producto = new Producto(textoNombre.getText(),textoDescripcion.getText(),cantidadInt);
+        
         var categoria = comboCategoria.getSelectedItem();
         
         /*Encapsulamos la excepcion que puede lanzar la consulta INSERT INTO del

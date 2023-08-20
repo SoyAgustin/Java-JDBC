@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.alura.jdbc.factory.ConnectionFactory;
+import com.alura.jdbc.modelo.Producto;
 
 public class ProductoController {
 
@@ -99,54 +100,37 @@ public class ProductoController {
 
 	
 	
-	public void guardar(Map<String,String> producto) throws SQLException {
+	public void guardar(Producto producto) throws SQLException {
 		final Connection con = new ConnectionFactory().recuperaConexion();
 		try (con){
-			/*Manejo de las transacciones de la base de datos se hacen automaticamente
-			 * */
 			con.setAutoCommit(false);
 
 			final PreparedStatement statement = con.prepareStatement("INSERT INTO producto (nombre, descripcion, cantidad)"+
 					"VALUES(?,?,?)",Statement.RETURN_GENERATED_KEYS);
+
 			try(statement){
-				/*Ahora vamos a agregar una nueva regla de negocio
-				 * solo se admiten en una peticion hasta 50 productos
-				 * si son más la query se dividira en dos*/
 
-				String nombre = producto.get("NOMBRE");
-				String descripcion = producto.get("DESCRIPCION");
-				Integer cantidad = Integer.valueOf(producto.get( "CANTIDAD"));
-				Integer maximaCantidad = 50;
-				/*La logica va a ser restar la maxima cantidad hasta que la cantidad sea
-				 * cero, de esta forma se dividiran los registros en bloques de la maxima cantidad*/
-				try {	
-					do {
-						int cantidadParaGuardar = Math.min(cantidad, maximaCantidad);
-						ejecutaRegistro(statement, nombre, descripcion, cantidadParaGuardar);
-						cantidad -= maximaCantidad;
-					}while(cantidad>0) ;
+				ejecutaRegistro(statement, producto);
+				con.commit();
 
-					//Hasta el momento en el que se cumple todo el ciclo (sin errores) se usa el commit
-					con.commit();
-					System.out.println("COMMIT");
-				}catch(Exception e){
-					/*En caso de que haya un error, se cancela la transaccion*/
-					con.rollback();
-					System.out.println("ROLLBACK");
-				}
+				System.out.println("COMMIT");
+			}catch(Exception e){
+				/*En caso de que haya un error, se cancela la transaccion*/
+				con.rollback();
+				System.out.println("ROLLBACK");
 			}
 		}
 	}
 
-	private void ejecutaRegistro(PreparedStatement statement, String nombre, String descripcion, Integer cantidad)
+	private void ejecutaRegistro(PreparedStatement statement,Producto producto)
 			throws SQLException {
 //Creando el error de prueba para cantidades menores a 50
 //	if(cantidad <50) {
 //		throw new RuntimeException("Ocurrio un error");
 //	}
-		statement.setString(1, nombre);
-		statement.setString(2, descripcion);
-		statement.setInt(3,cantidad);
+		statement.setString(1, producto.getNombre());
+		statement.setString(2, producto.getDescripcion());
+		statement.setInt(3,producto.getCantidad());
 		
 		/*usando las prepared statement el metodo execute queda vacio*/
 		statement.execute();
@@ -158,9 +142,10 @@ public class ProductoController {
 		try(resultSet){
 		while(resultSet.next()) {
 			/*Como solo se retorna el id, el metodo getInt busca en la unica 'columna' devuelta*/
+			producto.setId(resultSet.getInt(1) );
 			System.out.println(String.format(
-					"Se guardó el objeto con ID: %d",
-					resultSet.getInt(1) )
+					"Se guardó el objeto con ID: %s",
+					producto)
 					);
 		}
 		}
