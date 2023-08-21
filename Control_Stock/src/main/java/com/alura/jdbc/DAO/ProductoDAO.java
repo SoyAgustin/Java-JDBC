@@ -5,7 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.alura.jdbc.factory.ConnectionFactory;
 import com.alura.jdbc.modelo.Producto;
 
 /*DAO: Data Access Object*/
@@ -16,26 +19,18 @@ public class ProductoDAO {
 		this.con = con;
 	}
 	
-	public void guardar(Producto producto) throws SQLException {
+	public void guardar(Producto producto)  {
 		try (con){
-			con.setAutoCommit(false);
-
 			final PreparedStatement statement = con.prepareStatement("INSERT INTO producto (nombre, descripcion, cantidad)"+
 					"VALUES(?,?,?)",Statement.RETURN_GENERATED_KEYS);
-
 			try(statement){
-
 				ejecutaRegistro(statement, producto);
-				con.commit();
-
-				System.out.println("COMMIT");
-			}catch(Exception e){
-				/*En caso de que haya un error, se cancela la transaccion*/
-				con.rollback();
-				System.out.println("ROLLBACK");
 			}
+		}catch(SQLException e){
+			throw new RuntimeException(e);
 		}
 	}
+	
 	
 	private void ejecutaRegistro(PreparedStatement statement,Producto producto)
 			throws SQLException {
@@ -61,4 +56,39 @@ public class ProductoDAO {
 		}
 		}
 	}
+
+	public List<Producto> listar() {
+		
+		List<Producto> resultado  = new ArrayList<>();
+
+		final Connection con  = new ConnectionFactory().recuperaConexion();
+
+		try(con){
+			final PreparedStatement statement = con.prepareStatement("SELECT ID, NOMBRE, DESCRIPCION, CANTIDAD FROM producto");
+			try(statement){
+				statement.execute();
+
+				final ResultSet resultSet = statement.getResultSet();
+
+				try(resultSet){
+					while(resultSet.next()) {
+
+						Producto fila = new Producto(resultSet.getInt("ID"),
+								resultSet.getString("NOMBRE"),
+								resultSet.getString("DESCRIPCION"),
+								resultSet.getInt("CANTIDAD"));
+
+						resultado.add(fila);
+					}
+				}
+			}
+			return resultado;
+		} catch(SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	
 }
+
+

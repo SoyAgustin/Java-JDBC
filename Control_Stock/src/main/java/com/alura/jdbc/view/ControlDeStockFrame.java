@@ -226,20 +226,10 @@ public class ControlDeStockFrame extends JFrame {
     
     /*Este metodo se encarga de colocar el resultado de la consulta a la base de datos en la ventana*/
     private void cargarTabla() {
-    	try {
-    		/*Vemos que productos es un Map<String,String> como lo declaramos 
-    		 * en el metodo listar, así que tiene el método forEach*/
         var productos = this.productoController.listar();
         
-        try {
-            productos.forEach(producto -> modelo.addRow(new Object[] { producto.get("ID"), producto.get("NOMBRE"),producto.get("DESCRIPCION"),producto.get("CANTIDAD") }));
-        } catch (Exception e) {
-            throw e;
-        }
-        
-    	} catch(SQLException  e) {
-    		throw new RuntimeException(e);
-    	}
+            productos.forEach(producto -> modelo.addRow(new Object[] { producto.getId(), producto.getNombre(),producto.getDescripcion(),producto.getCantidad() }));
+    
 
         
     }
@@ -266,15 +256,8 @@ public class ControlDeStockFrame extends JFrame {
         var producto = new Producto(textoNombre.getText(),textoDescripcion.getText(),cantidadInt);
         
         var categoria = comboCategoria.getSelectedItem();
-        
-        /*Encapsulamos la excepcion que puede lanzar la consulta INSERT INTO del
-         * método guardar, igual que en otros casos, en caso de error se lanza la
-         * excepción RuntimeException*/
-        try {
+
 			this.productoController.guardar(producto);
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
 
         JOptionPane.showMessageDialog(this, "Registrado con éxito!");
 
