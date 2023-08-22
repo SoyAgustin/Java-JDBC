@@ -13,13 +13,9 @@ import com.alura.jdbc.modelo.Producto;
 
 /*DAO: Data Access Object*/
 public class ProductoDAO {
-	final private Connection con;
-	
-	public ProductoDAO(Connection con) {
-		this.con = con;
-	}
 	
 	public void guardar(Producto producto)  {
+		final Connection con  = new ConnectionFactory().recuperaConexion();
 		try (con){
 			final PreparedStatement statement = con.prepareStatement("INSERT INTO producto (nombre, descripcion, cantidad)"+
 					"VALUES(?,?,?)",Statement.RETURN_GENERATED_KEYS);
@@ -30,7 +26,6 @@ public class ProductoDAO {
 			throw new RuntimeException(e);
 		}
 	}
-	
 	
 	private void ejecutaRegistro(PreparedStatement statement,Producto producto)
 			throws SQLException {
@@ -84,6 +79,52 @@ public class ProductoDAO {
 			}
 			return resultado;
 		} catch(SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+
+	public int eliminar(Integer id) {
+		final Connection con  = new ConnectionFactory().recuperaConexion();
+		try(con){
+		
+			final PreparedStatement statement = con.prepareStatement("DELETE FROM producto WHERE ID =?");
+			try(statement){
+				statement.setInt(1, id);
+				statement.execute();
+				
+				int updateCount = statement.getUpdateCount();
+
+				return  updateCount;
+			}
+		}catch(SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+
+	public int modificar(String nombre, String descripcion, Integer cantidad,Integer id) {
+		final Connection con = new ConnectionFactory().recuperaConexion();
+		try(con){
+		
+			final PreparedStatement statement = con.prepareStatement("UPDATE producto SET "
+					+ " nombre =?,"
+					+ " descripcion=?,"
+					+ " cantidad=?"
+					+ " WHERE id=?");
+			try(statement){
+				statement.setString(1,nombre);
+				statement.setString(2,descripcion);
+				statement.setInt(3, cantidad);
+				statement.setInt(4, id);	
+				statement.execute();
+			
+			
+			int updateCount = statement.getUpdateCount();
+
+			return  updateCount;
+			}
+		}catch(SQLException e) {
 			throw new RuntimeException(e);
 		}
 	}
