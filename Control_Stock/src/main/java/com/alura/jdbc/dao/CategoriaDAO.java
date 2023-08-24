@@ -24,6 +24,8 @@ public class CategoriaDAO {
 		List <Categoria> resultado  = new ArrayList<>();
 		
 		try { 
+			var querySelect = "SELECT id, nombre FROM categoria";
+			System.out.println(querySelect);
 			final PreparedStatement statement = con.prepareStatement(
 					"SELECT id, nombre FROM categoria") ;
 			try(statement){

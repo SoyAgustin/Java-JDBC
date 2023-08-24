@@ -83,7 +83,41 @@ public class ProductoDAO {
 		}
 	}
 	
+	/*Sobreescritura para buscar por categoria_id el producto*/
+	public List<Producto> listar(Integer categoriaId) {
+		List<Producto> resultado  = new ArrayList<>();
 
+		final Connection con  = new ConnectionFactory().recuperaConexion();
+
+		try(con){
+			var querySelect = "SELECT ID, NOMBRE, DESCRIPCION, CANTIDAD FROM producto"+
+					" WHERE categoria_id=?";
+			System.out.println(querySelect);
+			final PreparedStatement statement = con.prepareStatement("SELECT ID, NOMBRE, DESCRIPCION, CANTIDAD FROM producto"+
+		" WHERE categoria_id=?");
+			try(statement){
+				statement.setInt(1, categoriaId);
+				statement.execute();
+
+				final ResultSet resultSet = statement.getResultSet();
+
+				try(resultSet){
+					while(resultSet.next()) {
+
+						Producto fila = new Producto(resultSet.getInt("ID"),
+								resultSet.getString("NOMBRE"),
+								resultSet.getString("DESCRIPCION"),
+								resultSet.getInt("CANTIDAD"));
+
+						resultado.add(fila);
+					}
+				}
+			}
+			return resultado;
+		} catch(SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	public int eliminar(Integer id) {
 		final Connection con  = new ConnectionFactory().recuperaConexion();
 		try(con){
@@ -128,6 +162,8 @@ public class ProductoDAO {
 			throw new RuntimeException(e);
 		}
 	}
+
+	
 	
 	
 }
