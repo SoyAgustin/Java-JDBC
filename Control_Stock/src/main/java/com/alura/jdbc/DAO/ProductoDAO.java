@@ -17,8 +17,8 @@ public class ProductoDAO {
 	public void guardar(Producto producto)  {
 		final Connection con  = new ConnectionFactory().recuperaConexion();
 		try (con){
-			final PreparedStatement statement = con.prepareStatement("INSERT INTO producto (nombre, descripcion, cantidad)"+
-					"VALUES(?,?,?)",Statement.RETURN_GENERATED_KEYS);
+			final PreparedStatement statement = con.prepareStatement("INSERT INTO producto (nombre, descripcion, cantidad, categoria_id)"+
+					"VALUES(?,?,?,?)",Statement.RETURN_GENERATED_KEYS);
 			try(statement){
 				ejecutaRegistro(statement, producto);
 			}
@@ -32,7 +32,7 @@ public class ProductoDAO {
 		statement.setString(1, producto.getNombre());
 		statement.setString(2, producto.getDescripcion());
 		statement.setInt(3,producto.getCantidad());
-		
+		statement.setInt(4, producto.getCategoriaId());
 		/*usando las prepared statement el metodo execute queda vacio*/
 		statement.execute();
 		

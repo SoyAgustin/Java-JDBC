@@ -10,8 +10,14 @@ public Categoria(int id, String nombre) {
 		this.nombre = nombre;
 	}
 
+public Integer getId() {
+	return this.id;
+}
+
 @Override
 public String toString() {
 	return this.nombre;
 }
+
+
 }
